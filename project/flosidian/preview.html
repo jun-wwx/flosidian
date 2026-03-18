@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroNote - Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1e1e1e; color: #fff; }
+    
+    .app { display: flex; height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar { width: 250px; background: #252526; border-right: 1px solid #3c3c3c; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c3c3c; }
+    .sidebar-header h2 { font-size: 16px; font-weight: 600; }
+    .sidebar-header button { width: 28px; height: 28px; border: none; background: #0e639c; color: #fff; border-radius: 4px; cursor: pointer; font-size: 18px; }
+    .notes-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .note-item { padding: 8px 12px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .note-item:hover { background: #2a2d2e; }
+    .note-item.active { background: #37373d; }
+    .note-name { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .delete-btn { opacity: 0; background: transparent; border: none; color: #f48771; cursor: pointer; font-size: 16px; padding: 2px 6px; }
+    .note-item:hover .delete-btn { opacity: 1; }
+    
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .toolbar { padding: 12px 16px; background: #252526; border-bottom: 1px solid #3c3c3c; display: flex; justify-content: space-between; align-items: center; }
+    .note-title { font-size: 14px; font-weight: 500; }
+    .toolbar button { padding: 6px 12px; background: #3c3c3c; border: none; color: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .toolbar button:hover { background: #4c4c4c; }
+    
+    .editor-container { flex: 1; display: flex; overflow: hidden; }
+    .editor { flex: 1; overflow: auto; padding: 12px; border-right: 1px solid #3c3c3c; background: #1e1e1e; }
+    .editor textarea { width: 100%; height: 100%; background: transparent; border: none; color: #d4d4d4; font-family: 'JetBrains Mono', monospace; font-size: 14px; resize: none; outline: none; line-height: 1.6; }
+    .preview { flex: 1; overflow: auto; padding: 20px; background: #1e1e1e; line-height: 1.6; }
+    .preview h1, .preview h2, .preview h3 { margin: 16px 0 8px; color: #fff; }
+    .preview p { margin-bottom: 12px; color: #d4d4d4; }
+    .preview code { background: #2d2d2d; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+    .preview pre { background: #2d2d2d; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 12px 0; }
+    .preview ul, .preview ol { margin: 12px 0; padding-left: 24px; color: #d4d4d4; }
+    .wiki-link { color: #4fc1ff; text-decoration: none; cursor: pointer; }
+    .wiki-link:hover { text-decoration: underline; }
+    
+    .backlinks { padding: 12px 16px; background: #252526; border-top: 1px solid #3c3c3c; }
+    .backlinks h3 { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; }
+    .backlink { display: inline-block; padding: 4px 8px; margin-right: 8px; margin-bottom: 4px; background: #3c3c3c; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .backlink:hover { background: #4c4c4c; }
+    
+    .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #888; }
+    .welcome h2 { margin-bottom: 12px; color: #fff; }
+    .welcome p { margin-bottom: 24px; }
+    .welcome button { padding: 10px 24px; background: #0e639c; border: none; color: #fff; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    
+    /* Dialog */
+    .dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .dialog { background: #252526; border: 1px solid #3c3c3c; border-radius: 8px; padding: 24px; width: 400px; }
+    .dialog h3 { margin-bottom: 16px; }
+    .dialog input { width: 100%; padding: 10px 12px; background: #3c3c3c; border: 1px solid #5c5c5c; color: #fff; border-radius: 4px; font-size: 14px; margin-bottom: 16px; }
+    .dialog-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+    .dialog-buttons button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .dialog-buttons button:first-child { background: #3c3c3c; color: #fff; }
+    .dialog-buttons button:last-child { background: #0e639c; color: #fff; }
+    
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h2>NeuroNote</h2>
+        <button onclick="showNewNoteDialog()">+</button>
+      </div>
+      <div class="notes-list" id="notesList"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main" id="mainContent">
+      <div class="welcome">
+        <h2>Welcome to NeuroNote</h2>
+        <p>Select a note or create a new one to get started.</p>
+        <button onclick="showNewNoteDialog()">Create New Note</button>
+      </div>
+    </div>
+
+    <!-- New Note Dialog -->
+    <div class="dialog-overlay hidden" id="dialogOverlay" onclick="closeDialog(event)">
+      <div class="dialog">
+        <h3>New Note</h3>
+        <input type="text" id="newNoteInput" placeholder="Note name" onkeydown="handleEnter(event)">
+        <div class="dialog-buttons">
+          <button onclick="closeDialogDirect()">Cancel</button>
+          <button onclick="createNote()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Demo data
+    let notes = [
+      { name: 'Welcome', content: '# Welcome to NeuroNote\n\nThis is your first note! 🎉\n\n## Features\n\n- **Markdown** support\n- **[[Wiki-links]]** for connecting notes\n- Auto-save\n\nTry creating a [[Second Note]] to see how links work!' },
+      { name: 'Second Note', content: '# Second Note\n\nThis note is linked from the [[Welcome]] note.\n\nYou can create bidirectional links between notes!' }
+    ];
+    let currentNote = null;
+    let showPreview = true;
+
+    function renderNotesList() {
+      const list = document.getElementById('notesList');
+      list.innerHTML = notes.map(note => `
+        <div class="note-item ${currentNote === note.name ? 'active' : ''}" onclick="selectNote('${note.name}')">
+          <span class="note-name">${note.name}</span>
+          <button class="delete-btn" onclick="deleteNote('${note.name}', event)">×</button>
+        </div>
+      `).join('');
+    }
+
+    function selectNote(name) {
+      currentNote = name;
+      renderNotesList();
+      renderMain();
+    }
+
+    function renderMain() {
+      const main = document.getElementById('mainContent');
+      const note = notes.find(n => n.name === currentNote);
+      
+      if (!note) {
+        main.innerHTML = `
+          <div class="welcome">
+            <h2>Welcome to NeuroNote</h2>
+            <p>Select a note or create a new one to get started.</p>
+            <button onclick="showNewNoteDialog()">Create New Note</button>
+          </div>`;
+        return;
+      }
+
+      // Find backlinks
+      const backlinks = notes.filter(n => n.name !== note.name && n.content.includes(`[[${note.name}]]`));
+
+      main.innerHTML = `
+        <div class="toolbar">
+          <span class="note-title">${note.name}</span>
+          <button onclick="togglePreview()">${showPreview ? 'Hide Preview' : 'Show Preview'}</button>
+        </div>
+        <div class="editor-container">
+          <div class="editor">
+            <textarea id="editor" oninput="updateContent(this.value)">${note.content}</textarea>
+          </div>
+          ${showPreview ? `<div class="preview" id="preview"></div>` : ''}
+        </div>
+        ${backlinks.length > 0 ? `
+        <div class="backlinks">
+          <h3>Backlinks</h3>
+          ${backlinks.map(n => `<span class="backlink" onclick="selectNote('${n.name}')">${n.name}</span>`).join('')}
+        </div>` : ''}`;
+      
+      renderPreview();
+    }
+
+    function updateContent(content) {
+      const note = notes.find(n => n.name === currentNote);
+      if (note) {
+        note.content = content;
+        renderPreview();
+      }
+    }
+
+    function renderPreview() {
+      const preview = document.getElementById('preview');
+      if (!preview) return;
+      
+      const note = notes.find(n => n.name === currentNote);
+      if (!note) return;
+      
+      // Process markdown and wiki-links
+      let html = note.content
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^\- (.+)$/gm, '<li>$1</li>')
+        .replace(/\[\[([^\]]+)\]\]/g, '<a href="#" class="wiki-link" onclick="selectNote(\'$1\')">$1</a>')
+        .replace(/\n/g, '<br>');
+      
+      preview.innerHTML = html;
+    }
+
+    function togglePreview() {
+      showPreview = !showPreview;
+      renderMain();
+    }
+
+    function showNewNoteDialog() {
+      document.getElementById('dialogOverlay').classList.remove('hidden');
+      document.getElementById('newNoteInput').focus();
+    }
+
+    function closeDialog(e) {
+      if (e.target.id === 'dialogOverlay') {
+        closeDialogDirect();
+      }
+    }
+
+    function closeDialogDirect() {
+      document.getElementById('dialogOverlay').classList.add('hidden');
+      document.getElementById('newNoteInput').value = '';
+    }
+
+    function handleEnter(e) {
+      if (e.key === 'Enter') createNote();
+    }
+
+    function createNote() {
+      const name = document.getElementById('newNoteInput').value.trim();
+      if (!name) return;
+      if (notes.find(n => n.name === name)) {
+        alert('Note already exists!');
+        return;
+      }
+      notes.push({ name, content: `# ${name}\n\n` });
+      currentNote = name;
+      closeDialogDirect();
+      renderNotesList();
+      renderMain();
+    }
+
+    function deleteNote(name, e) {
+      e.stopPropagation();
+      if (!confirm(`Delete "${name}"?`)) return;
+      notes = notes.filter(n => n.name !== name);
+      if (currentNote === name) currentNote = null;
+      renderNotesList();
+      renderMain();
+    }
+
+    // Init
+    renderNotesList();
+  </script>
+</body>
+</html>
