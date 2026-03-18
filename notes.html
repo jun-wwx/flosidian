@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵感笔记 - 灵感捕捉 + 时间记录</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #202020;
+        }
+
+        /* 第一屏：欢迎页 */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        .hero-icon {
+            font-size: 8em;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-title {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: #e5e5e5;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5em;
+            color: #888;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .hero-description {
+            max-width: 700px;
+            text-align: center;
+            color: #aaa;
+            line-height: 1.8;
+            font-size: 1.1em;
+            margin-bottom: 60px;
+        }
+
+        .hero-description strong {
+            color: #e5e5e5;
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #666;
+            font-size: 0.9em;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        .down-arrow {
+            font-size: 2em;
+            margin-top: 10px;
+        }
+
+        /* 第二屏：时间记录区 */
+        .notes-container {
+            min-height: 100vh;
+            padding: 60px 20px;
+        }
+
+        /* 第三屏：关于 */
+        .about-section {
+            min-height: 100vh;
+            padding: 60px 20px;
+            background: #1a1a1a;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .about-text h3 {
+            color: #e5e5e5;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .about-text h4 {
+            color: #e5e5e5;
+            font-size: 1.2em;
+            margin: 25px 0 10px;
+        }
+
+        .about-text p {
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .about-text ul {
+            color: #aaa;
+            line-height: 2;
+            padding-left: 20px;
+        }
+
+        .about-text li strong {
+            color: #e5e5e5;
+        }
+
+        .about-image {
+            text-align: center;
+        }
+
+        .about-image img {
+            width: 100%;
+            border-radius: 8px;
+            border: 3px solid #4a4a4a;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .image-caption {
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #e5e5e5;
+            font-size: 2em;
+            margin-bottom: 40px;
+        }
+
+        /* 统计卡片 */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #2c2c2c;
+            border: 2px solid #4a4a4a;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #5e81ac;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        /* 输入区域 */
+        .input-section {
+            background: #2c2c2c;
+            border: 2px solid #4a4a4a;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            background: #1a1a1a;
+            border: 2px solid #4a4a4a;
+            border-radius: 6px;
+            padding: 12px 15px;
+            font-size: 16px;
+            color: #e5e5e5;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #5e81ac;
+            box-shadow: 0 0 0 3px rgba(94, 129, 172, 0.15);
+        }
+
+        .input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-box {
+            width: 250px;
+            padding: 12px 15px;
+            background: #1a1a1a;
+            border: 2px solid #4a4a4a;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #e5e5e5;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #5e81ac;
+        }
+
+        .btn-primary {
+            background: #5e81ac;
+            color: #ffffff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #4c6f91;
+            transform: translateY(-1px);
+        }
+
+        .btn-start {
+            background: #4caf50;
+        }
+
+        .btn-start:hover {
+            background: #388e3c;
+        }
+
+        .btn-stop {
+            background: #ff6b6b;
+        }
+
+        .btn-stop:hover {
+            background: #e55353;
+        }
+
+        /* 计时状态 */
+        .timer-section {
+            background: #2c2c2c;
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .timer-section.active {
+            display: block;
+        }
+
+        .timer-title {
+            color: #4caf50;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .timer-display {
+            font-size: 3em;
+            font-weight: 700;
+            color: #4caf50;
+            text-align: center;
+        }
+
+        .timer-actions {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        /* 记录列表 */
+        .notes-section {
+            margin-top: 30px;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #dcddde;
+            margin-bottom: 15px;
+        }
+
+        .notes-count {
+            opacity: 0.9;
+        }
+
+        .note-card {
+            background: #2c2c2c;
+            border: 2px solid #4a4a4a;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .note-card:hover {
+            border-color: #5e81ac;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .note-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #e5e5e5;
+        }
+
+        .note-category {
+            background: rgba(94, 129, 172, 0.2);
+            color: #5e81ac;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .note-duration {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #5e81ac;
+        }
+
+        .note-content {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #dcddde;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 12px;
+        }
+
+        .note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #4a4a4a;
+        }
+
+        .note-time {
+            color: #888888;
+            font-size: 13px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .note-actions button {
+            background: none;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .note-actions .delete-btn {
+            color: #ff6b6b;
+        }
+
+        .note-actions .delete-btn:hover {
+            background: rgba(255, 107, 107, 0.15);
+        }
+
+        .note-actions .copy-btn {
+            color: #5e81ac;
+        }
+
+        .note-actions .copy-btn:hover {
+            background: rgba(94, 129, 172, 0.15);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #dcddde;
+            padding: 60px 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            opacity: 0.8;
+        }
+
+        .go-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #5e81ac;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .go-top:hover {
+            opacity: 1;
+        }
+
+        .category-work { background: rgba(94, 129, 172, 0.2); color: #5e81ac; }
+        .category-study { background: rgba(100, 200, 100, 0.2); color: #64c864; }
+        .category-life { background: rgba(255, 183, 77, 0.2); color: #ffb74d; }
+        .category-leisure { background: rgba(186, 104, 200, 0.2); color: #ba68c8; }
+
+        @media (max-width: 600px) {
+            .hero-title {
+                font-size: 2.2em;
+            }
+
+            .hero-icon {
+                font-size: 5em;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .input-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .go-top {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
+            }
+
+            .note-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一屏：欢迎页 -->
+    <section class="hero-section">
+        <div class="hero-icon">🦋</div>
+        <h1 class="hero-title">灵感笔记</h1>
+        <p class="hero-subtitle">Inspiration + Time Tracking</p>
+        <div class="hero-description">
+            <strong>既是灵感笔记本，也是柳比歇夫时间记录。</strong><br>
+            随时随地捕捉闪念灵感，也记录每件事花了多少时间。<br>
+            好想法不溜走，时间去向一目了然。<br>
+            所有数据存在本地，简洁又隐私。
+        </div>
+        <div class="scroll-hint">
+            向下滚动开始记录
+            <div class="down-arrow">⌄</div>
+        </div>
+    </section>
+
+    <!-- 第二屏：时间记录区 -->
+    <section class="notes-container" id="notes">
+        <div class="container">
+            <h2 class="section-title">灵感 & 时间记录</h2>
+
+            <!-- 统计卡片 -->
+            <div class="stats-section" id="statsSection">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalRecords">0</div>
+                    <div class="stat-label">总记录数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalHours">0</div>
+                    <div class="stat-label">总小时</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayHours">0</div>
+                    <div class="stat-label">今日小时</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="weekHours">0</div>
+                    <div class="stat-label">本周小时</div>
+                </div>
+            </div>
+
+            <!-- 正在计时 -->
+            <div class="timer-section" id="timerSection">
+                <div class="timer-title">⏱️ 正在计时</div>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-actions">
+                    <button class="btn-primary btn-stop" onclick="stopTimer()">停止并保存</button>
+                </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="input-section">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>事件名称</label>
+                        <input type="text" id="eventName" placeholder="比如：写代码 / 看书">
+                    </div>
+                    <div class="input-group">
+                        <label>分类</label>
+                        <select id="category">
+                            <option value="工作">工作</option>
+                            <option value="学习">学习</option>
+                            <option value="生活">生活</option>
+                            <option value="休闲">休闲</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>开始时间</label>
+                        <input type="datetime-local" id="startTime">
+                    </div>
+                    <div class="input-group">
+                        <label>结束时间（留空自动计算）</label>
+                        <input type="datetime-local" id="endTime">
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group" style="grid-column: 1 / -1;">
+                        <label>备注</label>
+                        <textarea id="description" placeholder="记录一些细节..."></textarea>
+                    </div>
+                </div>
+                <div class="input-actions">
+                    <input type="text" class="search-box" id="searchInput" placeholder="搜索记录..." oninput="searchRecords()">
+                    <div>
+                        <button class="btn-primary btn-start" onclick="startTimer()">开始计时</button>
+                        <button class="btn-primary" onclick="addRecord()" style="margin-left: 10px;">保存记录</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 记录列表 -->
+            <div class="notes-section">
+                <div class="notes-header">
+                    <h3 style="color: #dcddde;">时间记录</h3>
+                    <span class="notes-count" id="recordsCount">0 条记录</span>
+                </div>
+                <div id="recordsList"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第三屏：关于柳比歇夫 -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <h2 class="section-title">关于柳比歇夫时间记录法</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>什么是柳比歇夫时间统计法？</h3>
+                    <p>亚历山大·柳比歇夫是前苏联昆虫学家，他从26岁开始，坚持每天记录自己每件事情花了多少时间，直到去世，一共坚持了56年。</p>
+                    
+                    <h4>核心方法：</h4>
+                    <ul>
+                        <li><strong>如实记录</strong> — 做什么事，就记录什么事，不欺骗自己</li>
+                        <li><strong>计算耗时</strong> — 每件事精确到分钟，知道时间到底花在了哪里</li>
+                        <li><strong>定期总结</strong> — 每天、每周、每月统计时间分配，找到浪费的时间</li>
+                        <li><strong>持续改进</strong> — 知道时间去哪里了，才能更好地规划未来</li>
+                    </ul>
+
+                    <h4>为什么要做时间记录？</h4>
+                    <p>大多数人都不知道自己的时间到底花在了哪里。柳比歇夫通过记录，清楚地知道自己一天能做多少事，什么事情浪费了时间，从而更好地安排工作和生活。</p>
+                    
+                    <p>这个工具结合了flomo/obsidian式的笔记体验和柳比歇夫的时间统计方法，既能记灵感，也能记时间。</p>
+                </div>
+                <div class="about-image">
+                    <img src="https://pic1.zhimg.com/v2-f5b7e88281f8f5c2e2b8d2e8e8c2e2e2_1440w.jpg?source=172ae100" alt="亚历山大·柳比歇夫" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Alexander_Lyubishchev.jpg/800px-Alexander_Lyubishchev.jpg'">
+                    <p class="image-caption">亚历山大·格里戈里耶维奇·柳比歇夫</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <button class="go-top" onclick="scrollToTop()" title="回到顶部">↑</button>
+
+    <script>
+        let records = JSON.parse(localStorage.getItem('timeRecords')) || [];
+        let timerInterval = null;
+        let currentTimer = null;
+
+        // 初始化默认时间
+        function initDateTime() {
+            const now = new Date();
+            document.getElementById('startTime').value = formatDateTimeLocal(now);
+        }
+
+        function formatDateTimeLocal(dt) {
+            const tzOffset = dt.getTimezoneOffset() * 60000;
+            const localDT = new Date(dt.getTime() - tzOffset);
+            return localDT.toISOString().slice(0, 16);
+        }
+
+        function startTimer() {
+            const eventName = document.getElementById('eventName').value.trim();
+            if (!eventName) {
+                alert('请输入事件名称');
+                return;
+            }
+
+            const now = new Date();
+            currentTimer = {
+                name: eventName,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                startTime: now
+            };
+
+            document.getElementById('timerSection').classList.add('active');
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function updateTimerDisplay() {
+            if (!currentTimer) return;
+            const elapsed = new Date() - currentTimer.startTime;
+            const seconds = Math.floor(elapsed / 1000);
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function stopTimer() {
+            if (!currentTimer) return;
+            
+            const endTime = new Date();
+            const durationMs = endTime - currentTimer.startTime;
+            const durationHours = durationMs / (1000 * 60 * 60);
+
+            const record = {
+                id: Date.now(),
+                name: currentTimer.name,
+                category: currentTimer.category,
+                description: currentTimer.description,
+                startTime: currentTimer.startTime.toISOString(),
+                endTime: endTime.toISOString(),
+                durationHours: parseFloat(durationHours.toFixed(2))
+            };
+
+            records.unshift(record);
+            saveRecords();
+
+            // 清理
+            clearInterval(timerInterval);
+            timerInterval = null;
+            currentTimer = null;
+            document.getElementById('timerSection').classList.remove('active');
+            
+            // 清空表单
+            document.getElementById('eventName').value = '';
+            document.getElementById('description').value = '';
+            initDateTime();
+
+            renderAll();
+        }
+
+        function addRecord() {
+            const eventName = document.getElementById('eventName').value.trim();
+            if (!eventName) {
+                alert('请输入事件名称');
+                return;
+            }
+
+            const startTimeStr = document.getElementById('startTime').value;
+            if (!startTimeStr) {
+                alert('请选择开始时间');
+                return;
+            }
+
+            let endTime;
+            let durationHours;
+
+            const endTimeStr = document.getElementById('endTime').value;
+            if (endTimeStr) {
+                startTime = new Date(startTimeStr);
+                endTime = new Date(endTimeStr);
+                durationHours = (endTime - startTime) / (1000 * 60 * 60);
+            } else {
+                // 只记录开始，算到现在
+                startTime = new Date(startTimeStr);
+                endTime = new Date();
+                durationHours = (endTime - startTime) / (1000 * 60 * 60);
+            }
+
+            const record = {
+                id: Date.now(),
+                name: eventName,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value,
+                startTime: new Date(startTimeStr).toISOString(),
+                endTime: (endTimeStr ? new Date(endTimeStr) : new Date()).toISOString(),
+                durationHours: parseFloat(durationHours.toFixed(2))
+            };
+
+            records.unshift(record);
+            saveRecords();
+
+            // 清空
+            document.getElementById('eventName').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('endTime').value = '';
+            initDateTime();
+
+            renderAll();
+        }
+
+        function deleteRecord(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                records = records.filter(r => r.id !== id);
+                saveRecords();
+                renderAll();
+            }
+        }
+
+        function copyRecord(record) {
+            const text = `${record.name} (${record.category}) - ${record.durationHours}小时\n${record.description || ''}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板');
+            });
+        }
+
+        function searchRecords() {
+            renderAll();
+        }
+
+        function saveRecords() {
+            localStorage.setItem('timeRecords', JSON.stringify(records));
+        }
+
+        function formatDuration(hours) {
+            if (hours < 1) {
+                return `${Math.round(hours * 60)}m`;
+            }
+            return `${hours.toFixed(1)}h`;
+        }
+
+        function formatDate(isoString) {
+            return new Date(isoString).toLocaleString('zh-CN');
+        }
+
+        function getCategoryClass(category) {
+            switch(category) {
+                case '工作': return 'category-work';
+                case '学习': return 'category-study';
+                case '生活': return 'category-life';
+                case '休闲': return 'category-leisure';
+                default: return 'category-work';
+            }
+        }
+
+        function calculateStats() {
+            const totalRecords = records.length;
+            const totalHours = records.reduce((sum, r) => sum + r.durationHours, 0);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayStart = today.getTime();
+            const todayHours = records
+                .filter(r => new Date(r.startTime).getTime() >= todayStart)
+                .reduce((sum, r) => sum + r.durationHours, 0);
+
+            const weekStart = new Date();
+            const day = weekStart.getDay() || 7;
+            weekStart.setDate(weekStart.getDate() - day + 1);
+            weekStart.setHours(0, 0, 0, 0);
+            const weekHours = records
+                .filter(r => new Date(r.startTime).getTime() >= weekStart.getTime())
+                .reduce((sum, r) => sum + r.durationHours, 0);
+
+            return { totalRecords, totalHours, todayHours, weekHours };
+        }
+
+        function renderStats() {
+            const stats = calculateStats();
+            document.getElementById('totalRecords').textContent = stats.totalRecords;
+            document.getElementById('totalHours').textContent = stats.totalHours.toFixed(1);
+            document.getElementById('todayHours').textContent = stats.todayHours.toFixed(1);
+            document.getElementById('weekHours').textContent = stats.weekHours.toFixed(1);
+        }
+
+        function renderRecords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredRecords = records.filter(r => 
+                r.name.toLowerCase().includes(searchTerm) ||
+                r.category.toLowerCase().includes(searchTerm) ||
+                (r.description && r.description.toLowerCase().includes(searchTerm))
+            );
+
+            document.getElementById('recordsCount').textContent = `${filteredRecords.length} 条记录`;
+            const list = document.getElementById('recordsList');
+
+            if (filteredRecords.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <h3>${searchTerm ? '没有找到匹配的记录' : '还没有时间记录'}</h3>
+                        <p>${searchTerm ? '试试其他关键词' : '开始你的第一条时间记录吧'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = filteredRecords.map(r => `
+                <div class="note-card">
+                    <div class="note-header">
+                        <div>
+                            <span class="note-title">${escapeHtml(r.name)}</span>
+                            <span class="note-category ${getCategoryClass(r.category)}">${escapeHtml(r.category)}</span>
+                        </div>
+                        <div class="note-duration">${formatDuration(r.durationHours)}</div>
+                    </div>
+                    ${r.description ? `<div class="note-content">${escapeHtml(r.description)}</div>` : ''}
+                    <div class="note-meta">
+                        <span class="note-time">${formatDate(r.startTime)} → ${formatDate(r.endTime)}</span>
+                        <div class="note-actions">
+                            <button class="copy-btn" onclick="copyRecord(${JSON.stringify(r).replace(/"/g, '&quot;')})">复制</button>
+                            <button class="delete-btn" onclick="deleteRecord(${r.id})">删除</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAll() {
+            renderStats();
+            renderRecords();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('eventName').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                addRecord();
+            }
+        });
+
+        initDateTime();
+        renderAll();
+    </script>
+</body>
+</html>

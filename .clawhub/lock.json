@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "skills": {
+    "tavily-search": {
+      "version": "1.0.0",
+      "installedAt": 1773749912522
+    },
+    "summarize": {
+      "version": "1.0.0",
+      "installedAt": 1773749917946
+    },
+    "agent-browser": {
+      "version": "0.2.0",
+      "installedAt": 1773749919370
+    },
+    "find-skills": {
+      "version": "0.1.0",
+      "installedAt": 1773749922717
+    },
+    "github": {
+      "version": "1.0.0",
+      "installedAt": 1773749926957
+    },
+    "obsidian": {
+      "version": "1.0.0",
+      "installedAt": 1773749928652
+    },
+    "weather": {
+      "version": "1.0.0",
+      "installedAt": 1773749930940
+    },
+    "tencentcloud-lighthouse-skill": {
+      "version": "1.0.0",
+      "installedAt": 1773220499277
+    },
+    "tencent-docs": {
+      "version": "1.0.7",
+      "installedAt": 1773220501186
+    },
+    "tencent-cos-skill": {
+      "version": "1.0.6",
+      "installedAt": 1773220503352
+    },
+    "wechat-article-publisher": {
+      "version": "1.0.0",
+      "installedAt": 1773831570122
+    }
+  }
+}
