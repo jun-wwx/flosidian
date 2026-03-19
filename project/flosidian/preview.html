@@ -10,18 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg-primary: #1e1e1e;
-      --bg-secondary: #252526;
-      --bg-tertiary: #2d2d30;
-      --text-primary: #cccccc;
-      --text-secondary: #858585;
-      --accent: #6cb6ff;
-      --border: #3c3c3c;
-      --hover: #2a2d2e;
-      --tag-bg: #3c4e62;
-      --tag-text: #6cb6ff;
-    }
+    :root { --bg-primary: #1e1e1e; --bg-secondary: #252526; --bg-tertiary: #2d2d30; --text-primary: #cccccc; --text-secondary: #858585; --accent: #6cb6ff; --border: #3c3c3c; --hover: #2a2d2e; --tag-bg: #3c4e62; --tag-text: #6cb6ff; }
     body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; height: 100vh; }
     .app { display: flex; height: 100vh; }
     .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
@@ -39,16 +28,28 @@
     .note-item:hover { background: var(--hover); }
     .note-item.active { background: var(--accent); color: var(--bg-primary); }
     .note-icon { color: var(--text-secondary); flex-shrink: 0; }
+    .note-item.active .note-icon { color: var(--bg-primary); }
     .note-name { flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .delete-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0; transition: all 0.2s; display: flex; align-items: center; }
+    .note-item:hover .delete-btn { opacity: 1; }
+    .delete-btn:hover { background: #f48771; color: white; }
     .command-hint { padding: 12px; font-size: 11px; color: var(--text-secondary); text-align: center; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 6px; }
     .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; color: var(--text-secondary); padding: 40px; }
+    .welcome h1 { font-size: 32px; color: var(--text-primary); margin-bottom: 8px; background: linear-gradient(135deg, #6cb6ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .welcome p { font-size: 14px; max-width: 400px; text-align: center; line-height: 1.6; }
+    .welcome-features { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin: 16px 0; }
+    .welcome-feature { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 12px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border); }
+    .welcome-feature svg { color: var(--accent); }
+    .welcome button { background: var(--accent); border: none; color: var(--bg-primary); padding: 12px 32px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; margin-top: 16px; }
+    .welcome button:hover { background: var(--accent-hover); transform: translateY(-2px); }
     .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
     .note-title { font-size: 14px; font-weight: 500; }
     .toolbar button { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
     .toolbar button:hover { background: var(--hover); border-color: var(--accent); }
     .editor-container { flex: 1; display: flex; overflow: hidden; }
     .editor { flex: 1; overflow: auto; padding: 16px; background: var(--bg-primary); }
-    .editor-content { font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; }
+    .editor-content { font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; outline: none; min-height: 100%; }
     .preview { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-primary); border-left: 1px solid var(--border); font-size: 14px; line-height: 1.7; }
     .preview h1, .preview h2, .preview h3 { margin: 16px 0 8px; color: var(--text-primary); }
     .preview h1 { font-size: 24px; } .preview h2 { font-size: 20px; } .preview h3 { font-size: 16px; }
@@ -89,7 +90,7 @@
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
     const mockNotes = [{name:'欢迎使用'},{name:'双向链接笔记'},{name:'知识图谱'},{name:'使用技巧'},{name:'标签系统'}];
     const mockTags = [{name:'入门',count:3},{name:'教程',count:2},{name:'技巧',count:1},{name:'高级',count:1}];
     const mockContent = `# 欢迎使用 NeuroNote
@@ -114,9 +115,19 @@ NeuroNote 是一款**本地优先**的**双向链接笔记应用**，帮助你�
 
 查看 [[知识图谱]] 了解可视化功能。`;
     const mockBacklinks = ['双向链接笔记', '使用技巧'];
-    const Icons = {Search:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,Network:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4m-5 4 4-4m6 4-4-4"/></svg>,Plus:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14m-7-7h14"/></svg>,X:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>,FileText:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,Tags:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>,Command:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0-3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>,Link:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>};
+    const Icons = {
+      Search:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+      Network:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4m-5 4 4-4m6 4-4-4"/></svg>,
+      Plus:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14m-7-7h14"/></svg>,
+      X:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>,
+      FileText:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+      Tags:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>,
+      Command:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0-3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>,
+      Link:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    };
+
     function App() {
-      const [currentNote, setCurrentNote] = useState('欢迎使用');
+      const [currentNote, setCurrentNote] = useState(null);
       const [content, setContent] = useState(mockContent);
       const [showPreview, setShowPreview] = useState(true);
       const [showGraph, setShowGraph] = useState(false);
@@ -124,35 +135,73 @@ NeuroNote 是一款**本地优先**的**双向链接笔记应用**，帮助你�
       const [showCommandPalette, setShowCommandPalette] = useState(false);
       const [searchQuery, setSearchQuery] = useState('');
       const [commandQuery, setCommandQuery] = useState('');
+      const [showNewNoteDialog, setShowNewNoteDialog] = useState(false);
+      const [newNoteName, setNewNoteName] = useState('');
+      const editorRef = useRef(null);
+
       useEffect(() => {
         const h = e => {
           if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); setShowCommandPalette(true); }
-          if (e.key==='Escape') { setShowCommandPalette(false); setShowSearch(false); setShowGraph(false); }
+          if (e.key==='Escape') { setShowCommandPalette(false); setShowSearch(false); setShowGraph(false); setShowNewNoteDialog(false); }
         };
         window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h);
       }, []);
+
       const renderPreview = () => {
         let c = content.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,(_,n,a)=>`<a class="wiki-link">${a}</a>`).replace(/\[\[([^\]]+)\]\]/g,(_,n)=>`<a class="wiki-link">${n}</a>`).replace(/#([\w-]+)/g,'<span class="tag">#$1</span>').replace(/^### (.*$)/gim,'<h3>$1</h3>').replace(/^## (.*$)/gim,'<h2>$1</h2>').replace(/^# (.*$)/gim,'<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
         return {__html:c};
       };
+
+      const handleNoteClick = (noteName) => {
+        setCurrentNote(noteName);
+        if (noteName === '欢迎使用') {
+          setContent(mockContent);
+        }
+      };
+
       const searchResults = useMemo(() => searchQuery.trim()?mockNotes.filter(n=>n.name.toLowerCase().includes(searchQuery.toLowerCase())):[], [searchQuery]);
-      const commands = [{id:'search',label:'搜索笔记',action:()=>{setShowSearch(true);setShowCommandPalette(false)}},{id:'graph',label:'打开知识图谱',action:()=>{setShowGraph(true);setShowCommandPalette(false)}},{id:'new',label:'新建笔记',action:()=>setShowCommandPalette(false)}];
+      const commands = [
+        {id:'search',label:'搜索笔记',action:()=>{setShowSearch(true);setShowCommandPalette(false)}},
+        {id:'graph',label:'打开知识图谱',action:()=>{setShowGraph(true);setShowCommandPalette(false)}},
+        {id:'new',label:'新建笔记',action:()=>{setShowNewNoteDialog(true);setShowCommandPalette(false)}},
+        {id:'home',label:'返回首页',action:()=>{setCurrentNote(null);setShowCommandPalette(false)}}
+      ];
       const fCmds = commandQuery?commands.filter(c=>c.label.toLowerCase().includes(commandQuery.toLowerCase())):commands;
+
       return <div className="app">
         <div className="sidebar">
-          <div className="sidebar-header"><h2>NeuroNote</h2><div className="header-actions"><button className="icon-btn" onClick={()=>setShowSearch(true)}><Icons.Search/></button><button className="icon-btn" onClick={()=>setShowGraph(true)}><Icons.Network/></button><button className="icon-btn"><Icons.Plus/></button></div></div>
+          <div className="sidebar-header"><h2>NeuroNote</h2><div className="header-actions"><button className="icon-btn" onClick={()=>setShowSearch(true)}><Icons.Search/></button><button className="icon-btn" onClick={()=>setShowGraph(true)}><Icons.Network/></button><button className="icon-btn" onClick={()=>setShowNewNoteDialog(true)}><Icons.Plus/></button></div></div>
           <div className="tags-section"><div className="tags-header"><Icons.Tags/><span>标签</span></div><div className="tags-list">{mockTags.map(t=><span key={t.name} className="tag-item">#{t.name} ({t.count})</span>)}</div></div>
-          <div className="notes-list">{mockNotes.map(n=><div key={n.name} className={`note-item ${currentNote===n.name?'active':''}`} onClick={()=>setCurrentNote(n.name)}><Icons.FileText/><span className="note-name">{n.name}</span></div>)}</div>
+          <div className="notes-list">{mockNotes.map(n=><div key={n.name} className={`note-item ${currentNote===n.name?'active':''}`} onClick={()=>handleNoteClick(n.name)}><Icons.FileText/><span className="note-name">{n.name}</span></div>)}</div>
           <div className="command-hint"><Icons.Command/> Ctrl+K 打开命令面板</div>
         </div>
         <div className="main">
-          {showGraph&&<div className="graph-overlay"><div className="graph-header"><h3>知识图谱</h3><button onClick={()=>setShowGraph(false)}><Icons.X/></button></div><div className="graph-container"><svg viewBox="0 0 800 480" style={{width:'100%',height:'100%'}}><line x1="400" y1="100" x2="150" y2="350" stroke="#3c3c3c" strokeWidth="2"/><line x1="400" y1="100" x2="650" y2="350" stroke="#3c3c3c" strokeWidth="2"/><g transform="translate(400,100)"><circle r="30" fill="#6cb6ff"/><text textAnchor="middle" dy="5" fill="#1e1e1e" fontSize="12">欢迎使用</text></g><g transform="translate(150,350)"><circle r="25" fill="#a78bfa"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">双向链接</text></g><g transform="translate(650,350)"><circle r="25" fill="#34d399"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">知识图谱</text></g></svg></div></div>}
-          <div className="toolbar"><span className="note-title">{currentNote}</span><button onClick={()=>setShowPreview(!showPreview)}>{showPreview?'隐藏预览':'显示预览'}</button></div>
-          <div className="editor-container"><div className="editor"><pre className="editor-content">{content}</pre></div>{showPreview&&<div className="preview" dangerouslySetInnerHTML={renderPreview()}></div>}</div>
-          <div className="backlinks"><h3><Icons.Link/> 反向链接 ({mockBacklinks.length})</h3>{mockBacklinks.map(l=><div key={l} className="backlink"><Icons.FileText/> {l}</div>)}</div>
+          {showGraph&&<div className="graph-overlay"><div className="graph-header"><h3>知识图谱</h3><button onClick={()=>setShowGraph(false)}><Icons.X/></button></div><div className="graph-container"><svg viewBox="0 0 800 480" style={{width:'100%',height:'100%'}}><line x1="400" y1="100" x2="150" y2="350" stroke="#3c3c3c" strokeWidth="2"/><line x1="400" y1="100" x2="650" y2="350" stroke="#3c3c3c" strokeWidth="2"/><line x1="150" y1="350" x2="300" y2="400" stroke="#3c3c3c" strokeWidth="2"/><line x1="650" y1="350" x2="500" y2="400" stroke="#3c3c3c" strokeWidth="2"/><g transform="translate(400,100)"><circle r="30" fill="#6cb6ff"/><text textAnchor="middle" dy="5" fill="#1e1e1e" fontSize="12">欢迎使用</text></g><g transform="translate(150,350)"><circle r="25" fill="#a78bfa"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">双向链接</text></g><g transform="translate(650,350)"><circle r="25" fill="#34d399"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">知识图谱</text></g><g transform="translate(300,400)"><circle r="20" fill="#f472b6"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="10">使用技巧</text></g><g transform="translate(500,400)"><circle r="20" fill="#fbbf24"/><text textAnchor="middle" dy="4" fill="#1e1e1e" fontSize="10">标签系统</text></g></svg></div></div>}
+          
+          {currentNote ? (
+            <>
+              <div className="toolbar"><span className="note-title">{currentNote}</span><button onClick={()=>setShowPreview(!showPreview)}>{showPreview?'隐藏预览':'显示预览'}</button></div>
+              <div className="editor-container"><div className="editor"><pre className="editor-content">{content}</pre></div>{showPreview&&<div className="preview" dangerouslySetInnerHTML={renderPreview()}></div>}</div>
+              <div className="backlinks"><h3><Icons.Link/> 反向链接 ({mockBacklinks.length})</h3>{mockBacklinks.map(l=><div key={l} className="backlink" onClick={()=>handleNoteClick(l)}><Icons.FileText/> {l}</div>)}</div>
+            </>
+          ) : (
+            <div className="welcome">
+              <h1>🧠 NeuroNote</h1>
+              <p>欢迎使用 NeuroNote，一款本地优先的双向链接笔记应用，帮助你构建个人知识图谱。</p>
+              <div className="welcome-features">
+                <div className="welcome-feature"><Icons.FileText/> Markdown 编辑</div>
+                <div className="welcome-feature"><Icons.Link/> 双向链接</div>
+                <div className="welcome-feature"><Icons.Tags/> 标签系统</div>
+                <div className="welcome-feature"><Icons.Network/> 知识图谱</div>
+              </div>
+              <p style={{fontSize:'12px',color:'#666'}}>从左侧选择一个笔记开始，或创建新笔记</p>
+              <button onClick={()=>setShowNewNoteDialog(true)}>创建新笔记</button>
+            </div>
+          )}
         </div>
-        {showSearch&&<div className="search-panel"><div className="search-header"><Icons.Search/><input placeholder="搜索笔记..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} autoFocus/><button onClick={()=>setShowSearch(false)}><Icons.X/></button></div><div className="search-results">{searchResults.map(r=><div key={r.name} className="search-result"><div className="result-name">{r.name}</div></div>)}{searchQuery&&searchResults.length===0&&<div className="no-results">未找到结果</div>}</div></div>}
+        {showSearch&&<div className="search-panel"><div className="search-header"><Icons.Search/><input placeholder="搜索笔记..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} autoFocus/><button onClick={()=>setShowSearch(false)}><Icons.X/></button></div><div className="search-results">{searchResults.map(r=><div key={r.name} className="search-result" onClick={()=>{handleNoteClick(r.name);setShowSearch(false)}}><div className="result-name">{r.name}</div></div>)}{searchQuery&&searchResults.length===0&&<div className="no-results">未找到结果</div>}</div></div>}
         {showCommandPalette&&<div className="command-palette-overlay" onClick={()=>setShowCommandPalette(false)}><div className="command-palette" onClick={e=>e.stopPropagation()}><input placeholder="输入命令..." value={commandQuery} onChange={e=>setCommandQuery(e.target.value)} autoFocus/><div className="commands-list">{fCmds.map(c=><div key={c.id} className="command-item" onClick={c.action}>{c.label}</div>)}</div></div></div>}
+        {showNewNoteDialog&&<div className="command-palette-overlay" onClick={()=>setShowNewNoteDialog(false)}><div className="command-palette" onClick={e=>e.stopPropagation()} style={{padding:'16px'}}><div style={{marginBottom:'12px',fontWeight:500}}>新建笔记</div><input placeholder="笔记名称" value={newNoteName} onChange={e=>setNewNoteName(e.target.value)} style={{width:'100%',padding:'10px',background:'var(--bg-tertiary)',border:'1px solid var(--border)',borderRadius:'6px',color:'var(--text-primary)',marginBottom:'12px'}} autoFocus onKeyDown={e=>e.key==='Enter'&&newNoteName.trim()&&(handleNoteClick(newNoteName.trim()),setShowNewNoteDialog(false),setNewNoteName(''))}/><div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}><button onClick={()=>setShowNewNoteDialog(false)} style={{padding:'8px 16px',background:'transparent',border:'1px solid var(--border)',borderRadius:'6px',color:'var(--text-primary)',cursor:'pointer'}}>取消</button><button onClick={()=>newNoteName.trim()&&(handleNoteClick(newNoteName.trim()),setShowNewNoteDialog(false),setNewNoteName(''))} style={{padding:'8px 16px',background:'var(--accent)',border:'none',borderRadius:'6px',color:'var(--bg-primary)',cursor:'pointer'}}>创建</button></div></div></div>}
       </div>;
     }
     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
