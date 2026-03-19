@@ -1,490 +1,161 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeuroNote - 你的第二大脑</title>
+  <title>NeuroNote - 知识笔记应用</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-      background: #1a1a1a; 
-      color: #fff;
-      min-height: 100vh;
+    :root {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #252526;
+      --bg-tertiary: #2d2d30;
+      --text-primary: #cccccc;
+      --text-secondary: #858585;
+      --accent: #6cb6ff;
+      --border: #3c3c3c;
+      --hover: #2a2d2e;
+      --tag-bg: #3c4e62;
+      --tag-text: #6cb6ff;
     }
-    
-    /* Hero Section */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: 
-        radial-gradient(ellipse at top, #1f1f2e 0%, transparent 50%),
-        radial-gradient(ellipse at bottom right, #0d1117 0%, transparent 50%),
-        linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(88, 166, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
-      pointer-events: none;
-    }
-    
-    /* Logo */
-    .logo-container {
-      position: relative;
-      margin-bottom: 40px;
-    }
-    
-    .logo {
-      width: 140px;
-      height: 140px;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border-radius: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      box-shadow: 
-        0 0 0 1px rgba(255,255,255,0.1),
-        0 20px 60px rgba(0,0,0,0.5),
-        0 0 100px rgba(88, 166, 255, 0.1);
-      animation: float 6s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    .logo::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 32px;
-      background: linear-gradient(135deg, rgba(88, 166, 255, 0.3), rgba(139, 92, 246, 0.3));
-      z-index: -1;
-      opacity: 0.5;
-    }
-    
-    .logo-icon {
-      font-size: 64px;
-      background: linear-gradient(135deg, #58a4ff, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .logo-glow {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(88, 166, 255, 0.2) 0%, transparent 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: -2;
-      animation: pulse 4s ease-in-out infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-      50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
-    }
-    
-    .app-name {
-      font-size: 48px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #fff 0%, #a0a0a0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .tagline {
-      font-size: 20px;
-      color: #8b949e;
-      margin-bottom: 48px;
-      font-weight: 400;
-    }
-    
-    .tagline-cn {
-      font-size: 16px;
-      color: #6e7681;
-      margin-bottom: 48px;
-    }
-    
-    /* CTA Buttons */
-    .cta-buttons {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 64px;
-    }
-    
-    .btn {
-      padding: 14px 32px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #58a4ff, #8b5cf6);
-      color: #fff;
-      border: none;
-      box-shadow: 0 4px 20px rgba(88, 166, 255, 0.3);
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(88, 166, 255, 0.4);
-    }
-    
-    .btn-secondary {
-      background: rgba(255,255,255,0.05);
-      color: #c9d1d9;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.1);
-      border-color: rgba(255,255,255,0.2);
-    }
-    
-    /* Features */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      max-width: 900px;
-      padding: 0 24px;
-    }
-    
-    .feature {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: left;
-    }
-    
-    .feature-icon {
-      font-size: 28px;
-      margin-bottom: 12px;
-    }
-    
-    .feature-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #e6edf3;
-      margin-bottom: 8px;
-    }
-    
-    .feature-desc {
-      font-size: 14px;
-      color: #8b949e;
-      line-height: 1.5;
-    }
-    
-    /* Footer */
-    .footer {
-      position: absolute;
-      bottom: 24px;
-      color: #484f58;
-      font-size: 13px;
-    }
-    
-    /* App View */
-    .app { display: none; height: 100vh; }
-    .app.active { display: flex; }
-    .hero.hidden { display: none; }
-    
-    /* Sidebar */
-    .sidebar { width: 250px; background: #252526; border-right: 1px solid #3c3c3c; display: flex; flex-direction: column; }
-    .sidebar-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3c3c3c; }
-    .sidebar-header h2 { font-size: 16px; font-weight: 600; }
-    .sidebar-header button { width: 28px; height: 28px; border: none; background: #0e639c; color: #fff; border-radius: 4px; cursor: pointer; font-size: 18px; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; height: 100vh; }
+    .app { display: flex; height: 100vh; }
+    .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .sidebar-header h2 { font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #6cb6ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-actions { display: flex; gap: 4px; }
+    .icon-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .icon-btn:hover { background: var(--hover); color: var(--text-primary); }
+    .tags-section { padding: 12px; border-bottom: 1px solid var(--border); }
+    .tags-header { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-item { font-size: 11px; padding: 3px 8px; background: var(--tag-bg); color: var(--tag-text); border-radius: 12px; cursor: pointer; }
     .notes-list { flex: 1; overflow-y: auto; padding: 8px; }
-    .note-item { padding: 8px 12px; margin-bottom: 4px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .note-item:hover { background: #2a2d2e; }
-    .note-item.active { background: #37373d; }
-    .note-name { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .delete-btn { opacity: 0; background: transparent; border: none; color: #f48771; cursor: pointer; font-size: 16px; padding: 2px 6px; }
-    .note-item:hover .delete-btn { opacity: 1; }
-    
-    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .toolbar { padding: 12px 16px; background: #252526; border-bottom: 1px solid #3c3c3c; display: flex; justify-content: space-between; align-items: center; }
+    .note-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; color: var(--text-primary); }
+    .note-item:hover { background: var(--hover); }
+    .note-item.active { background: var(--accent); color: var(--bg-primary); }
+    .note-icon { color: var(--text-secondary); flex-shrink: 0; }
+    .note-name { flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .command-hint { padding: 12px; font-size: 11px; color: var(--text-secondary); text-align: center; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
     .note-title { font-size: 14px; font-weight: 500; }
-    .toolbar button { padding: 6px 12px; background: #3c3c3c; border: none; color: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; }
-    
+    .toolbar button { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .toolbar button:hover { background: var(--hover); border-color: var(--accent); }
     .editor-container { flex: 1; display: flex; overflow: hidden; }
-    .editor { flex: 1; overflow: auto; padding: 12px; border-right: 1px solid #3c3c3c; background: #1e1e1e; }
-    .editor textarea { width: 100%; height: 100%; background: transparent; border: none; color: #d4d4d4; font-family: 'JetBrains Mono', monospace; font-size: 14px; resize: none; outline: none; line-height: 1.6; }
-    .preview { flex: 1; overflow: auto; padding: 20px; background: #1e1e1e; line-height: 1.6; }
-    .preview h1, .preview h2, .preview h3 { margin: 16px 0 8px; color: #fff; }
-    .preview p { margin-bottom: 12px; color: #d4d4d4; }
-    .preview code { background: #2d2d2d; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
-    .preview pre { background: #2d2d2d; padding: 12px; border-radius: 6px; overflow-x: auto; margin: 12px 0; }
-    .wiki-link { color: #4fc1ff; text-decoration: none; cursor: pointer; }
-    
-    .backlinks { padding: 12px 16px; background: #252526; border-top: 1px solid #3c3c3c; }
-    .backlinks h3 { font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase; }
-    .backlink { display: inline-block; padding: 4px 8px; margin-right: 8px; background: #3c3c3c; border-radius: 4px; font-size: 12px; cursor: pointer; }
-    
-    .welcome-app { flex: 1; display: flex; align-items: center; justify-content: center; color: #888; flex-direction: column; }
-    .welcome-app h2 { color: #fff; margin-bottom: 12px; }
-    .welcome-app button { padding: 10px 24px; background: #0e639c; border: none; color: #fff; border-radius: 4px; cursor: pointer; }
-    
-    .dialog-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    .dialog-overlay.active { display: flex; }
-    .dialog { background: #252526; border: 1px solid #3c3c3c; border-radius: 8px; padding: 24px; width: 400px; }
-    .dialog h3 { margin-bottom: 16px; }
-    .dialog input { width: 100%; padding: 10px 12px; background: #3c3c3c; border: 1px solid #5c5c5c; color: #fff; border-radius: 4px; font-size: 14px; margin-bottom: 16px; }
-    .dialog-buttons { display: flex; justify-content: flex-end; gap: 8px; }
-    .dialog-buttons button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
-    .dialog-buttons button:first-child { background: #3c3c3c; color: #fff; }
-    .dialog-buttons button:last-child { background: #0e639c; color: #fff; }
-    
-    .back-btn {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      padding: 8px 16px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: #fff;
-      border-radius: 8px;
-      cursor: pointer;
-      z-index: 100;
-    }
+    .editor { flex: 1; overflow: auto; padding: 16px; background: var(--bg-primary); }
+    .editor-content { font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; }
+    .preview { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-primary); border-left: 1px solid var(--border); font-size: 14px; line-height: 1.7; }
+    .preview h1, .preview h2, .preview h3 { margin: 16px 0 8px; color: var(--text-primary); }
+    .preview h1 { font-size: 24px; } .preview h2 { font-size: 20px; } .preview h3 { font-size: 16px; }
+    .preview p { margin: 8px 0; }
+    .preview code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 13px; }
+    .preview strong { color: var(--accent); }
+    .wiki-link { color: var(--accent) !important; cursor: pointer; border-bottom: 1px dashed var(--accent); }
+    .preview .tag { background: var(--tag-bg); color: var(--tag-text); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    .backlinks { padding: 16px; background: var(--bg-secondary); border-top: 1px solid var(--border); max-height: 200px; overflow-y: auto; }
+    .backlinks h3 { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .backlink { padding: 8px 12px; background: var(--bg-tertiary); border-radius: 6px; margin-bottom: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    .backlink:hover { background: var(--accent); color: var(--bg-primary); }
+    .graph-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 850px; height: 560px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.4); z-index: 100; display: flex; flex-direction: column; }
+    .graph-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); }
+    .graph-header h3 { font-size: 16px; }
+    .graph-header button { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; }
+    .graph-container { flex: 1; background: var(--bg-primary); }
+    .search-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; max-height: 400px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); z-index: 100; display: flex; flex-direction: column; }
+    .search-header { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+    .search-header input { flex: 1; background: transparent; border: none; color: var(--text-primary); font-size: 16px; outline: none; }
+    .search-header input::placeholder { color: var(--text-secondary); }
+    .search-header button { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; }
+    .search-results { flex: 1; overflow-y: auto; padding: 8px; }
+    .search-result { padding: 12px; border-radius: 8px; cursor: pointer; }
+    .search-result:hover { background: var(--hover); }
+    .result-name { font-weight: 500; color: var(--accent); }
+    .no-results { padding: 24px; text-align: center; color: var(--text-secondary); }
+    .command-palette-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-start; justify-content: center; padding-top: 100px; z-index: 200; }
+    .command-palette { width: 400px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); overflow: hidden; }
+    .command-palette input { width: 100%; padding: 16px; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-primary); font-size: 16px; outline: none; }
+    .commands-list { max-height: 300px; overflow-y: auto; padding: 8px; }
+    .command-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; cursor: pointer; color: var(--text-primary); }
+    .command-item:hover { background: var(--hover); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   </style>
 </head>
 <body>
-  <!-- Hero Section -->
-  <div class="hero" id="hero">
-    <button class="back-btn" onclick="openApp()" style="position:absolute;top:20px;left:20px;">← 体验 Demo</button>
-    
-    <div class="logo-container">
-      <div class="logo-glow"></div>
-      <div class="logo">
-        <span class="logo-icon">🧠</span>
-      </div>
-    </div>
-    
-    <h1 class="app-name">NeuroNote</h1>
-    <p class="tagline">Your Second Brain, Locally Owned</p>
-    <p class="tagline-cn">你的第二大脑，本地数据永无丢失</p>
-    
-    <div class="cta-buttons">
-      <button class="btn btn-primary" onclick="openApp()">开始使用 →</button>
-      <a href="https://github.com/jun-wwx/flosidian" target="_blank" class="btn btn-secondary">GitHub</a>
-    </div>
-    
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">📝</div>
-        <div class="feature-title">双向链接</div>
-        <div class="feature-desc">用 [[wiki-style]] 链接连接你的想法，构建个人知识图谱</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🔒</div>
-        <div class="feature-title">本地优先</div>
-        <div class="feature-desc">Markdown 文件存储在本地，数据完全归你所有</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-title">轻量快速</div>
-        <div class="feature-desc">基于 Tauri 构建，启动即用，无需等待</div>
-      </div>
-    </div>
-    
-    <div class="footer">
-      v0.1.0 · Built with Tauri + React
-    </div>
-  </div>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+    const mockNotes = [{name:'欢迎使用'},{name:'双向链接笔记'},{name:'知识图谱'},{name:'使用技巧'},{name:'标签系统'}];
+    const mockTags = [{name:'入门',count:3},{name:'教程',count:2},{name:'技巧',count:1},{name:'高级',count:1}];
+    const mockContent = `# 欢迎使用 NeuroNote
 
-  <!-- App Section -->
-  <div class="app" id="app">
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <h2>🧠 NeuroNote</h2>
-        <button onclick="showNewNoteDialog()">+</button>
-      </div>
-      <div class="notes-list" id="notesList"></div>
-    </div>
+NeuroNote 是一款**本地优先**的**双向链接笔记应用**，帮助你构建个人知识图谱。
 
-    <div class="main" id="mainContent">
-      <div class="welcome-app">
-        <h2>Welcome to NeuroNote</h2>
-        <p style="margin-bottom:16px">选择一个笔记或创建新笔记开始</p>
-        <button onclick="showNewNoteDialog()">创建新笔记</button>
-      </div>
-    </div>
+## 核心特性
 
-    <div class="dialog-overlay" id="dialogOverlay" onclick="closeDialog(event)">
-      <div class="dialog">
-        <h3>新建笔记</h3>
-        <input type="text" id="newNoteInput" placeholder="笔记名称" onkeydown="handleEnter(event)">
-        <div class="dialog-buttons">
-          <button onclick="closeDialogDirect()">取消</button>
-          <button onclick="createNote()">创建</button>
+- 📝 Markdown 编辑 - 实时预览
+- 🔗 双向链接 - 使用 [[双向链接笔记]] 连接笔记
+- 🏷️ 标签系统 - 使用 #标签 组织内容
+- 🌐 知识图谱 - 可视化知识网络
+
+## 快速开始
+
+1. 在左侧创建新笔记
+2. 使用 [[笔记名]] 创建链接
+3. 使用 #标签 添加标签
+4. 按 Ctrl+K 打开命令面板
+
+## 相关笔记
+
+查看 [[知识图谱]] 了解可视化功能。`;
+    const mockBacklinks = ['双向链接笔记', '使用技巧'];
+    const Icons = {Search:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,Network:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4m-5 4 4-4m6 4-4-4"/></svg>,Plus:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14m-7-7h14"/></svg>,X:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>,FileText:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,Tags:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>,Command:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0-3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>,Link:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>};
+    function App() {
+      const [currentNote, setCurrentNote] = useState('欢迎使用');
+      const [content, setContent] = useState(mockContent);
+      const [showPreview, setShowPreview] = useState(true);
+      const [showGraph, setShowGraph] = useState(false);
+      const [showSearch, setShowSearch] = useState(false);
+      const [showCommandPalette, setShowCommandPalette] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [commandQuery, setCommandQuery] = useState('');
+      useEffect(() => {
+        const h = e => {
+          if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); setShowCommandPalette(true); }
+          if (e.key==='Escape') { setShowCommandPalette(false); setShowSearch(false); setShowGraph(false); }
+        };
+        window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h);
+      }, []);
+      const renderPreview = () => {
+        let c = content.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,(_,n,a)=>`<a class="wiki-link">${a}</a>`).replace(/\[\[([^\]]+)\]\]/g,(_,n)=>`<a class="wiki-link">${n}</a>`).replace(/#([\w-]+)/g,'<span class="tag">#$1</span>').replace(/^### (.*$)/gim,'<h3>$1</h3>').replace(/^## (.*$)/gim,'<h2>$1</h2>').replace(/^# (.*$)/gim,'<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
+        return {__html:c};
+      };
+      const searchResults = useMemo(() => searchQuery.trim()?mockNotes.filter(n=>n.name.toLowerCase().includes(searchQuery.toLowerCase())):[], [searchQuery]);
+      const commands = [{id:'search',label:'搜索笔记',action:()=>{setShowSearch(true);setShowCommandPalette(false)}},{id:'graph',label:'打开知识图谱',action:()=>{setShowGraph(true);setShowCommandPalette(false)}},{id:'new',label:'新建笔记',action:()=>setShowCommandPalette(false)}];
+      const fCmds = commandQuery?commands.filter(c=>c.label.toLowerCase().includes(commandQuery.toLowerCase())):commands;
+      return <div className="app">
+        <div className="sidebar">
+          <div className="sidebar-header"><h2>NeuroNote</h2><div className="header-actions"><button className="icon-btn" onClick={()=>setShowSearch(true)}><Icons.Search/></button><button className="icon-btn" onClick={()=>setShowGraph(true)}><Icons.Network/></button><button className="icon-btn"><Icons.Plus/></button></div></div>
+          <div className="tags-section"><div className="tags-header"><Icons.Tags/><span>标签</span></div><div className="tags-list">{mockTags.map(t=><span key={t.name} className="tag-item">#{t.name} ({t.count})</span>)}</div></div>
+          <div className="notes-list">{mockNotes.map(n=><div key={n.name} className={`note-item ${currentNote===n.name?'active':''}`} onClick={()=>setCurrentNote(n.name)}><Icons.FileText/><span className="note-name">{n.name}</span></div>)}</div>
+          <div className="command-hint"><Icons.Command/> Ctrl+K 打开命令面板</div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Demo data
-    let notes = [
-      { name: '欢迎', content: '# 欢迎使用 NeuroNote\n\n这是你的第一篇笔记！🎉\n\n## 功能特点\n\n- **Markdown** 支持\n- **[[双向链接]]** 连接笔记\n- 自动保存\n\n试试创建 [[第二篇笔记]] 看看链接效果！' },
-      { name: '第二篇笔记', content: '# 第二篇笔记\n\n这篇笔记从 [[欢迎]] 链接过来。\n\n双向链接让笔记不再是孤岛！' }
-    ];
-    let currentNote = null;
-    let showPreview = true;
-
-    function openApp() {
-      document.getElementById('hero').classList.add('hidden');
-      document.getElementById('app').classList.add('active');
-      renderNotesList();
-    }
-
-    function renderNotesList() {
-      const list = document.getElementById('notesList');
-      list.innerHTML = notes.map(note => `
-        <div class="note-item ${currentNote === note.name ? 'active' : ''}" onclick="selectNote('${note.name}')">
-          <span class="note-name">${note.name}</span>
-          <button class="delete-btn" onclick="deleteNote('${note.name}', event)">×</button>
+        <div className="main">
+          {showGraph&&<div className="graph-overlay"><div className="graph-header"><h3>知识图谱</h3><button onClick={()=>setShowGraph(false)}><Icons.X/></button></div><div className="graph-container"><svg viewBox="0 0 800 480" style={{width:'100%',height:'100%'}}><line x1="400" y1="100" x2="150" y2="350" stroke="#3c3c3c" strokeWidth="2"/><line x1="400" y1="100" x2="650" y2="350" stroke="#3c3c3c" strokeWidth="2"/><g transform="translate(400,100)"><circle r="30" fill="#6cb6ff"/><text textAnchor="middle" dy="5" fill="#1e1e1e" fontSize="12">欢迎使用</text></g><g transform="translate(150,350)"><circle r="25" fill="#a78bfa"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">双向链接</text></g><g transform="translate(650,350)"><circle r="25" fill="#34d399"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">知识图谱</text></g></svg></div></div>}
+          <div className="toolbar"><span className="note-title">{currentNote}</span><button onClick={()=>setShowPreview(!showPreview)}>{showPreview?'隐藏预览':'显示预览'}</button></div>
+          <div className="editor-container"><div className="editor"><pre className="editor-content">{content}</pre></div>{showPreview&&<div className="preview" dangerouslySetInnerHTML={renderPreview()}></div>}</div>
+          <div className="backlinks"><h3><Icons.Link/> 反向链接 ({mockBacklinks.length})</h3>{mockBacklinks.map(l=><div key={l} className="backlink"><Icons.FileText/> {l}</div>)}</div>
         </div>
-      `).join('');
+        {showSearch&&<div className="search-panel"><div className="search-header"><Icons.Search/><input placeholder="搜索笔记..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} autoFocus/><button onClick={()=>setShowSearch(false)}><Icons.X/></button></div><div className="search-results">{searchResults.map(r=><div key={r.name} className="search-result"><div className="result-name">{r.name}</div></div>)}{searchQuery&&searchResults.length===0&&<div className="no-results">未找到结果</div>}</div></div>}
+        {showCommandPalette&&<div className="command-palette-overlay" onClick={()=>setShowCommandPalette(false)}><div className="command-palette" onClick={e=>e.stopPropagation()}><input placeholder="输入命令..." value={commandQuery} onChange={e=>setCommandQuery(e.target.value)} autoFocus/><div className="commands-list">{fCmds.map(c=><div key={c.id} className="command-item" onClick={c.action}>{c.label}</div>)}</div></div></div>}
+      </div>;
     }
-
-    function selectNote(name) {
-      currentNote = name;
-      renderNotesList();
-      renderMain();
-    }
-
-    function renderMain() {
-      const main = document.getElementById('mainContent');
-      const note = notes.find(n => n.name === currentNote);
-      
-      if (!note) {
-        main.innerHTML = `
-          <div class="welcome-app">
-            <h2>Welcome to NeuroNote</h2>
-            <p style="margin-bottom:16px">选择一个笔记或创建新笔记开始</p>
-            <button onclick="showNewNoteDialog()">创建新笔记</button>
-          </div>`;
-        return;
-      }
-
-      const backlinks = notes.filter(n => n.name !== note.name && n.content.includes(`[[${note.name}]]`));
-
-      main.innerHTML = `
-        <div class="toolbar">
-          <span class="note-title">${note.name}</span>
-          <button onclick="togglePreview()">${showPreview ? '隐藏预览' : '显示预览'}</button>
-        </div>
-        <div class="editor-container">
-          <div class="editor">
-            <textarea id="editor" oninput="updateContent(this.value)">${note.content}</textarea>
-          </div>
-          ${showPreview ? `<div class="preview" id="preview"></div>` : ''}
-        </div>
-        ${backlinks.length > 0 ? `
-        <div class="backlinks">
-          <h3>反向链接</h3>
-          ${backlinks.map(n => `<span class="backlink" onclick="selectNote('${n.name}')">${n.name}</span>`).join('')}
-        </div>` : ''}`;
-      
-      renderPreview();
-    }
-
-    function updateContent(content) {
-      const note = notes.find(n => n.name === currentNote);
-      if (note) {
-        note.content = content;
-        renderPreview();
-      }
-    }
-
-    function renderPreview() {
-      const preview = document.getElementById('preview');
-      if (!preview) return;
-      
-      const note = notes.find(n => n.name === currentNote);
-      if (!note) return;
-      
-      let html = note.content
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^\- (.+)$/gm, '<li>$1</li>')
-        .replace(/\[\[([^\]]+)\]\]/g, '<a href="#" class="wiki-link" onclick="selectNote(\'$1\')">$1</a>')
-        .replace(/\n/g, '<br>');
-      
-      preview.innerHTML = html;
-    }
-
-    function togglePreview() {
-      showPreview = !showPreview;
-      renderMain();
-    }
-
-    function showNewNoteDialog() {
-      document.getElementById('dialogOverlay').classList.add('active');
-      document.getElementById('newNoteInput').focus();
-    }
-
-    function closeDialog(e) {
-      if (e.target.id === 'dialogOverlay') closeDialogDirect();
-    }
-
-    function closeDialogDirect() {
-      document.getElementById('dialogOverlay').classList.remove('active');
-      document.getElementById('newNoteInput').value = '';
-    }
-
-    function handleEnter(e) { if (e.key === 'Enter') createNote(); }
-
-    function createNote() {
-      const name = document.getElementById('newNoteInput').value.trim();
-      if (!name) return;
-      if (notes.find(n => n.name === name)) { alert('笔记已存在！'); return; }
-      notes.push({ name, content: `# ${name}\n\n` });
-      currentNote = name;
-      closeDialogDirect();
-      renderNotesList();
-      renderMain();
-    }
-
-    function deleteNote(name, e) {
-      e.stopPropagation();
-      if (!confirm(`删除 "${name}"？`)) return;
-      notes = notes.filter(n => n.name !== name);
-      if (currentNote === name) currentNote = null;
-      renderNotesList();
-      renderMain();
-    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
   </script>
 </body>
 </html>
