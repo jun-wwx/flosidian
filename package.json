@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
+    "preview": "pnpm run build && wrangler dev",
+    "tauri": "tauri",
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.3",
@@ -27,11 +28,13 @@
     "react-force-graph-2d": "^1.29.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.30.0",
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "wrangler": "^4.76.0"
   }
 }
