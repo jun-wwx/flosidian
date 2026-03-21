@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeuroNote - 知识笔记应用</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bg-primary: #1e1e1e; --bg-secondary: #252526; --bg-tertiary: #2d2d30; --text-primary: #cccccc; --text-secondary: #858585; --accent: #6cb6ff; --accent-hover: #4a9eff; --border: #3c3c3c; --hover: #2a2d2e; --tag-bg: #3c4e62; --tag-text: #6cb6ff; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; height: 100vh; }
+    .app { display: flex; height: 100vh; }
+    .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .sidebar-header h2 { font-size: 16px; font-weight: 600; background: linear-gradient(135deg, #6cb6ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .header-actions { display: flex; gap: 4px; }
+    .icon-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .icon-btn:hover { background: var(--hover); color: var(--text-primary); }
+    .tags-section { padding: 12px; border-bottom: 1px solid var(--border); }
+    .tags-header { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-item { font-size: 11px; padding: 3px 8px; background: var(--tag-bg); color: var(--tag-text); border-radius: 12px; cursor: pointer; }
+    .notes-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .note-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; color: var(--text-primary); }
+    .note-item:hover { background: var(--hover); }
+    .note-item.active { background: var(--accent); color: var(--bg-primary); }
+    .note-icon { color: var(--text-secondary); flex-shrink: 0; }
+    .note-item.active .note-icon { color: var(--bg-primary); }
+    .note-name { flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .delete-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; border-radius: 4px; opacity: 0; transition: all 0.2s; display: flex; align-items: center; }
+    .note-item:hover .delete-btn { opacity: 1; }
+    .delete-btn:hover { background: #f48771; color: white; }
+    .command-hint { padding: 12px; font-size: 11px; color: var(--text-secondary); text-align: center; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    
+    /* 首页样式 */
+    .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; }
+    .welcome-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at top, rgba(108,182,255,0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(167,139,250,0.08) 0%, transparent 50%); pointer-events: none; }
+    .welcome-content { position: relative; z-index: 1; text-align: center; max-width: 600px; }
+    .logo { font-size: 72px; margin-bottom: 20px; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)} }
+    .welcome h1 { font-size: 42px; font-weight: 700; margin-bottom: 12px; background: linear-gradient(135deg, #6cb6ff 0%, #a78bfa 50%, #f472b6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .slogan { font-size: 18px; color: #888; margin-bottom: 32px; }
+    .welcome-desc { font-size: 14px; color: #666; line-height: 1.8; margin-bottom: 40px; max-width: 480px; }
+    .welcome-desc strong { color: #999; }
+    .welcome-features { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .welcome-feature { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 10px 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border); }
+    .welcome-feature svg { color: var(--accent); }
+    .welcome-actions { display: flex; gap: 16px; justify-content: center; }
+    .btn-primary { background: linear-gradient(135deg, #6cb6ff, #a78bfa); border: none; color: white; padding: 14px 32px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,182,255,0.3); }
+    .btn-secondary { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 14px 32px; border-radius: 10px; cursor: pointer; font-size: 15px; transition: all 0.2s; }
+    .btn-secondary:hover { border-color: var(--accent); }
+    .scroll-hint { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: #555; font-size: 12px; animation: bounce 2s infinite; }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%)translateY(0)}50%{transform:translateX(-50%)translateY(8px)} }
+    
+    .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+    .note-title { font-size: 14px; font-weight: 500; }
+    .toolbar button { background: var(--bg-tertiary); border: 1px solid var(--border); color: var(--text-primary); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .toolbar button:hover { background: var(--hover); border-color: var(--accent); }
+    .editor-container { flex: 1; display: flex; overflow: hidden; }
+    .editor { flex: 1; overflow: auto; padding: 16px; background: var(--bg-primary); }
+    .editor-content { font-family: 'Fira Code', monospace; font-size: 14px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; outline: none; min-height: 100%; }
+    .preview { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-primary); border-left: 1px solid var(--border); font-size: 14px; line-height: 1.7; }
+    .preview h1, .preview h2, .preview h3 { margin: 16px 0 8px; color: var(--text-primary); }
+    .preview h1 { font-size: 24px; } .preview h2 { font-size: 20px; } .preview h3 { font-size: 16px; }
+    .preview p { margin: 8px 0; }
+    .preview code { background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 13px; }
+    .preview strong { color: var(--accent); }
+    .wiki-link { color: var(--accent) !important; cursor: pointer; border-bottom: 1px dashed var(--accent); }
+    .preview .tag { background: var(--tag-bg); color: var(--tag-text); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    .backlinks { padding: 16px; background: var(--bg-secondary); border-top: 1px solid var(--border); max-height: 200px; overflow-y: auto; }
+    .backlinks h3 { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+    .backlink { padding: 8px 12px; background: var(--bg-tertiary); border-radius: 6px; margin-bottom: 6px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    .backlink:hover { background: var(--accent); color: var(--bg-primary); }
+    .graph-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 850px; height: 560px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.4); z-index: 100; display: flex; flex-direction: column; }
+    .graph-header { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1px solid var(--border); }
+    .graph-header h3 { font-size: 16px; }
+    .graph-header button { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; }
+    .graph-container { flex: 1; background: var(--bg-primary); }
+    .search-panel { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; max-height: 400px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); z-index: 100; display: flex; flex-direction: column; }
+    .search-header { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
+    .search-header input { flex: 1; background: transparent; border: none; color: var(--text-primary); font-size: 16px; outline: none; }
+    .search-header input::placeholder { color: var(--text-secondary); }
+    .search-header button { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; }
+    .search-results { flex: 1; overflow-y: auto; padding: 8px; }
+    .search-result { padding: 12px; border-radius: 8px; cursor: pointer; }
+    .search-result:hover { background: var(--hover); }
+    .result-name { font-weight: 500; color: var(--accent); }
+    .no-results { padding: 24px; text-align: center; color: var(--text-secondary); }
+    .command-palette-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-start; justify-content: center; padding-top: 100px; z-index: 200; }
+    .command-palette { width: 400px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.3); overflow: hidden; }
+    .command-palette input { width: 100%; padding: 16px; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-primary); font-size: 16px; outline: none; }
+    .commands-list { max-height: 300px; overflow-y: auto; padding: 8px; }
+    .command-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 8px; cursor: pointer; color: var(--text-primary); }
+    .command-item:hover { background: var(--hover); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+    const mockNotes = [{name:'欢迎使用'},{name:'双向链接笔记'},{name:'知识图谱'},{name:'使用技巧'},{name:'标签系统'}];
+    const mockTags = [{name:'入门',count:3},{name:'教程',count:2},{name:'技巧',count:1},{name:'高级',count:1}];
+    const mockContent = `# 欢迎使用 NeuroNote
+
+NeuroNote 是一款**本地优先**的**双向链接笔记应用**，帮助你构建个人知识图谱。
+
+## 核心特性
+
+- 📝 Markdown 编辑 - 实时预览
+- 🔗 双向链接 - 使用 [[双向链接笔记]] 连接笔记
+- 🏷️ 标签系统 - 使用 #标签 组织内容
+- 🌐 知识图谱 - 可视化知识网络
+
+## 快速开始
+
+1. 在左侧创建新笔记
+2. 使用 [[笔记名]] 创建链接
+3. 使用 #标签 添加标签
+4. 按 Ctrl+K 打开命令面板
+
+## 相关笔记
+
+查看 [[知识图谱]] 了解可视化功能。`;
+    const mockBacklinks = ['双向链接笔记', '使用技巧'];
+    const Icons = {
+      Search:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+      Network:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v4m-5 4 4-4m6 4-4-4"/></svg>,
+      Plus:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14m-7-7h14"/></svg>,
+      X:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>,
+      FileText:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+      Tags:()=><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>,
+      Command:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0-3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>,
+      Link:()=><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+      Edit:()=><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    };
+
+    function App() {
+      const [currentNote, setCurrentNote] = useState(null);
+      const [content, setContent] = useState(mockContent);
+      const [showPreview, setShowPreview] = useState(true);
+      const [showGraph, setShowGraph] = useState(false);
+      const [showSearch, setShowSearch] = useState(false);
+      const [showCommandPalette, setShowCommandPalette] = useState(false);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [commandQuery, setCommandQuery] = useState('');
+      const [showNewNoteDialog, setShowNewNoteDialog] = useState(false);
+      const [newNoteName, setNewNoteName] = useState('');
+
+      useEffect(() => {
+        const h = e => {
+          if ((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); setShowCommandPalette(true); }
+          if (e.key==='Escape') { setShowCommandPalette(false); setShowSearch(false); setShowGraph(false); setShowNewNoteDialog(false); }
+        };
+        window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h);
+      }, []);
+
+      const renderPreview = () => {
+        let c = content.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,(_,n,a)=>`<a class="wiki-link">${a}</a>`).replace(/\[\[([^\]]+)\]\]/g,(_,n)=>`<a class="wiki-link">${n}</a>`).replace(/#([\w-]+)/g,'<span class="tag">#$1</span>').replace(/^### (.*$)/gim,'<h3>$1</h3>').replace(/^## (.*$)/gim,'<h2>$1</h2>').replace(/^# (.*$)/gim,'<h1>$1</h1>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
+        return {__html:c};
+      };
+
+      const handleNoteClick = (noteName) => {
+        setCurrentNote(noteName);
+        if (noteName === '欢迎使用') setContent(mockContent);
+      };
+
+      const searchResults = useMemo(() => searchQuery.trim()?mockNotes.filter(n=>n.name.toLowerCase().includes(searchQuery.toLowerCase())):[], [searchQuery]);
+      const commands = [
+        {id:'search',label:'搜索笔记',action:()=>{setShowSearch(true);setShowCommandPalette(false)}},
+        {id:'graph',label:'打开知识图谱',action:()=>{setShowGraph(true);setShowCommandPalette(false)}},
+        {id:'new',label:'新建笔记',action:()=>{setShowNewNoteDialog(true);setShowCommandPalette(false)}},
+        {id:'home',label:'返回首页',action:()=>{setCurrentNote(null);setShowCommandPalette(false)}}
+      ];
+      const fCmds = commandQuery?commands.filter(c=>c.label.toLowerCase().includes(commandQuery.toLowerCase())):commands;
+
+      return <div className="app">
+        <div className="sidebar">
+          <div className="sidebar-header"><h2>NeuroNote</h2><div className="header-actions"><button className="icon-btn" onClick={()=>setShowSearch(true)}><Icons.Search/></button><button className="icon-btn" onClick={()=>setShowGraph(true)}><Icons.Network/></button><button className="icon-btn" onClick={()=>setShowNewNoteDialog(true)}><Icons.Plus/></button></div></div>
+          <div className="tags-section"><div className="tags-header"><Icons.Tags/><span>标签</span></div><div className="tags-list">{mockTags.map(t=><span key={t.name} className="tag-item">#{t.name} ({t.count})</span>)}</div></div>
+          <div className="notes-list">{mockNotes.map(n=><div key={n.name} className={`note-item ${currentNote===n.name?'active':''}`} onClick={()=>handleNoteClick(n.name)}><Icons.FileText/><span className="note-name">{n.name}</span></div>)}</div>
+          <div className="command-hint"><Icons.Command/> Ctrl+K 打开命令面板</div>
+        </div>
+        <div className="main">
+          {showGraph&&<div className="graph-overlay"><div className="graph-header"><h3>知识图谱</h3><button onClick={()=>setShowGraph(false)}><Icons.X/></button></div><div className="graph-container"><svg viewBox="0 0 800 480" style={{width:'100%',height:'100%'}}><line x1="400" y1="100" x2="150" y2="350" stroke="#3c3c3c" strokeWidth="2"/><line x1="400" y1="100" x2="650" y2="350" stroke="#3c3c3c" strokeWidth="2"/><line x1="150" y1="350" x2="300" y2="400" stroke="#3c3c3c" strokeWidth="2"/><line x1="650" y1="350" x2="500" y2="400" stroke="#3c3c3c" strokeWidth="2"/><g transform="translate(400,100)"><circle r="30" fill="#6cb6ff"/><text textAnchor="middle" dy="5" fill="#1e1e1e" fontSize="12">欢迎使用</text></g><g transform="translate(150,350)"><circle r="25" fill="#a78bfa"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">双向链接</text></g><g transform="translate(650,350)"><circle r="25" fill="#34d399"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="11">知识图谱</text></g><g transform="translate(300,400)"><circle r="20" fill="#f472b6"/><text textAnchor="middle" dy="4" fill="#fff" fontSize="10">使用技巧</text></g><g transform="translate(500,400)"><circle r="20" fill="#fbbf24"/><text textAnchor="middle" dy="4" fill="#1e1e1e" fontSize="10">标签系统</text></g></svg></div></div>}
+          
+          {currentNote ? (
+            <>
+              <div className="toolbar"><span className="note-title">{currentNote}</span><button onClick={()=>setShowPreview(!showPreview)}>{showPreview?'隐藏预览':'显示预览'}</button></div>
+              <div className="editor-container"><div className="editor"><pre className="editor-content">{content}</pre></div>{showPreview&&<div className="preview" dangerouslySetInnerHTML={renderPreview()}></div>}</div>
+              <div className="backlinks"><h3><Icons.Link/> 反向链接 ({mockBacklinks.length})</h3>{mockBacklinks.map(l=><div key={l} className="backlink" onClick={()=>handleNoteClick(l)}><Icons.FileText/> {l}</div>)}</div>
+            </>
+          ) : (
+            <div className="welcome">
+              <div className="welcome-bg"></div>
+              <div className="welcome-content">
+                <div className="logo">🧠</div>
+                <h1>NeuroNote</h1>
+                <div className="slogan">打造你的第二大脑</div>
+                <div className="welcome-desc">
+                  本地优先的<strong>双向链接笔记应用</strong>，帮助你构建个人知识图谱。<br/>
+                  让笔记不再是孤岛，而是相互连接的知识网络。
+                </div>
+                <div className="welcome-features">
+                  <div className="welcome-feature"><Icons.FileText/> Markdown 编辑</div>
+                  <div className="welcome-feature"><Icons.Link/> 双向链接</div>
+                  <div className="welcome-feature"><Icons.Tags/> 标签系统</div>
+                  <div className="welcome-feature"><Icons.Network/> 知识图谱</div>
+                </div>
+                <div className="welcome-actions">
+                  <button className="btn-primary" onClick={()=>setShowNewNoteDialog(true)}>创建新笔记</button>
+                  <button className="btn-secondary" onClick={()=>handleNoteClick('欢迎使用')}>浏览示例</button>
+                </div>
+              </div>
+              <div className="scroll-hint">
+                <div>从左侧选择笔记开始</div>
+              </div>
+            </div>
+          )}
+        </div>
+        {showSearch&&<div className="search-panel"><div className="search-header"><Icons.Search/><input placeholder="搜索笔记..." value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} autoFocus/><button onClick={()=>setShowSearch(false)}><Icons.X/></button></div><div className="search-results">{searchResults.map(r=><div key={r.name} className="search-result" onClick={()=>{handleNoteClick(r.name);setShowSearch(false)}}><div className="result-name">{r.name}</div></div>)}{searchQuery&&searchResults.length===0&&<div className="no-results">未找到结果</div>}</div></div>}
+        {showCommandPalette&&<div className="command-palette-overlay" onClick={()=>setShowCommandPalette(false)}><div className="command-palette" onClick={e=>e.stopPropagation()}><input placeholder="输入命令..." value={commandQuery} onChange={e=>setCommandQuery(e.target.value)} autoFocus/><div className="commands-list">{fCmds.map(c=><div key={c.id} className="command-item" onClick={c.action}>{c.label}</div>)}</div></div></div>}
+        {showNewNoteDialog&&<div className="command-palette-overlay" onClick={()=>setShowNewNoteDialog(false)}><div className="command-palette" onClick={e=>e.stopPropagation()} style={{padding:'16px'}}><div style={{marginBottom:'12px',fontWeight:500}}>新建笔记</div><input placeholder="笔记名称" value={newNoteName} onChange={e=>setNewNoteName(e.target.value)} style={{width:'100%',padding:'10px',background:'var(--bg-tertiary)',border:'1px solid var(--border)',borderRadius:'6px',color:'var(--text-primary)',marginBottom:'12px'}} autoFocus onKeyDown={e=>e.key==='Enter'&&newNoteName.trim()&&(handleNoteClick(newNoteName.trim()),setShowNewNoteDialog(false),setNewNoteName(''))}/><div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}><button onClick={()=>setShowNewNoteDialog(false)} style={{padding:'8px 16px',background:'transparent',border:'1px solid var(--border)',borderRadius:'6px',color:'var(--text-primary)',cursor:'pointer'}}>取消</button><button onClick={()=>newNoteName.trim()&&(handleNoteClick(newNoteName.trim()),setShowNewNoteDialog(false),setNewNoteName(''))} style={{padding:'8px 16px',background:'var(--accent)',border:'none',borderRadius:'6px',color:'var(--bg-primary)',cursor:'pointer'}}>创建</button></div></div></div>}
+      </div>;
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
