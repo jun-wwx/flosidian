@@ -20,9 +20,11 @@
     "@tauri-apps/plugin-opener": "^2",
     "@types/marked": "^5.0.2",
     "codemirror": "^6.0.2",
+    "lucide-react": "^0.577.0",
     "marked": "^17.0.4",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-force-graph-2d": "^1.29.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
